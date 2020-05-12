@@ -435,39 +435,6 @@ const menuData = `[
     ]
   },
   {
-    "path": "/alert",
-    "component": "main",
-    "name": "alert",
-    "meta": {
-      "title":"监控告警",
-      "hideInMenu": false,
-      "icon": "md-alert",
-      "access": ["alert"]
-    },
-    "children": [
-      {
-        "path": "rule",
-        "name": "rule",
-        "meta": {
-          "title": "规则管理",
-          "icon": "md-barcode",
-          "access": ["rule"]
-        },
-        "component": "alert"
-      },
-      {
-        "path": "Scrape",
-        "name": "Scrape",
-        "meta": {
-          "title": "Scrape",
-          "icon": "md-contract",
-          "access": ["scrape"]
-        },
-        "component": "alert"
-      }
-    ]
-  },
-  {
     "path": "/cplugin",
     "component": "main",
     "name": "cplugin",
