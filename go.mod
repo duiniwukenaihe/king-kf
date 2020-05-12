@@ -9,3 +9,10 @@ require (
 	github.com/open-kingfisher/king-utils v0.0.0-20200429073640-13927c2848f1
 	golang.org/x/sync v0.0.0-20200317015054-43a5402ce75a
 )
+
+replace (
+	k8s.io/api => k8s.io/api v0.17.3
+	k8s.io/apimachinery => k8s.io/apimachinery v0.17.3
+	k8s.io/client-go => k8s.io/client-go v0.17.3
+	k8s.io/metrics => k8s.io/metrics v0.17.3
+)
