@@ -7,3 +7,6 @@ Kingfisher Platform Service
 ## 依赖
 
 - Golang： `Go >= 1.13`
+
+## 联系我们
+- [交流群](https://github.com/open-kingfisher/community/blob/master/contact_us/README.md)
