@@ -1014,6 +1014,12 @@ func (r *PlatformRoleResource) ListPlatformRoleTree() (interface{}, error) {
                 			}
                 		]
                     },
+					{
+                        "title": "配置管理",
+                        "expand": true,
+                        "name": "config",
+                		"level": 3
+                    },
                     {
                         "title": "审计日志",
                         "expand": true,
