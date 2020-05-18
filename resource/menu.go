@@ -529,6 +529,16 @@ const menuData = `[
         "component": "plugin"
       },
       {
+        "path": "config",
+        "name": "config",
+        "meta": {
+          "title": "配置管理",
+          "icon": "md-create",
+          "access": ["config"]
+        },
+        "component": "audit"
+      },
+      {
         "path": "audit",
         "name": "audit",
         "meta": {
