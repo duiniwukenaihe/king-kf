@@ -26,6 +26,13 @@ func SetupRouter(r *gin.Engine) *gin.Engine {
 		// user lookup
 		authorize.GET(common.KingfisherPath+"userlookup", user.GetUserLookup)
 
+		// product
+		authorize.GET(common.KingfisherPath+"product", impl.ListProduct)
+		authorize.GET(common.KingfisherPath+"product/:name", impl.GetProduct)
+		authorize.POST(common.KingfisherPath+"product", impl.CreateProduct)
+		authorize.DELETE(common.KingfisherPath+"product/:name", impl.DeleteProduct)
+		authorize.PUT(common.KingfisherPath+"product", impl.UpdateProduct)
+
 		// cluster
 		authorize.GET(common.KingfisherPath+"cluster", impl.ListCluster)
 		authorize.GET(common.KingfisherPath+"cluster/:name", impl.GetCluster)
@@ -44,10 +51,10 @@ func SetupRouter(r *gin.Engine) *gin.Engine {
 		// audit log
 		authorize.GET(common.KingfisherPath+"audit", impl.ListAuditLog)
 
-		//// cascade
-		//authorize.GET(common.KingfisherPath+"cascade", impl.CascadeCluster)
-		//authorize.GET(common.KingfisherPath+"cascadeAll", impl.CascadeAll)
-		//authorize.GET(common.KingfisherPath+"treeClusterNamespace", impl.TreeClusterNamespace)
+		// cascade
+		authorize.GET(common.KingfisherPath+"cascade", impl.CascadeCluster)
+		authorize.GET(common.KingfisherPath+"cascadeAll", impl.CascadeAll)
+		authorize.GET(common.KingfisherPath+"treeClusterNamespace", impl.TreeClusterNamespace)
 
 		// plugin
 		authorize.GET(common.KingfisherPath+"plugin", impl.ListPlugin)
@@ -82,6 +89,13 @@ func SetupRouter(r *gin.Engine) *gin.Engine {
 		authorize.POST(common.KingfisherPath+"template", impl.CreateTemplate)
 		authorize.DELETE(common.KingfisherPath+"template/:name", impl.DeleteTemplate)
 		authorize.PUT(common.KingfisherPath+"template", impl.UpdateTemplate)
+
+		// config
+		authorize.GET(common.KingfisherPath+"config", impl.ListConfig)
+		authorize.GET(common.KingfisherPath+"config/:name", impl.GetConfig)
+		authorize.POST(common.KingfisherPath+"config", impl.CreateConfig)
+		authorize.DELETE(common.KingfisherPath+"config/:name", impl.DeleteConfig)
+		authorize.PUT(common.KingfisherPath+"config", impl.UpdateConfig)
 
 	}
 	return r
