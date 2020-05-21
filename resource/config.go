@@ -6,10 +6,9 @@ import (
 	"github.com/open-kingfisher/king-utils/common/handle"
 	"github.com/open-kingfisher/king-utils/common/log"
 	"github.com/open-kingfisher/king-utils/db"
+	"github.com/open-kingfisher/king-utils/kit"
 	"time"
 )
-
-const ID = "c_000000000001"
 
 type ConfigResource struct {
 	Params     *handle.Resources
@@ -19,7 +18,7 @@ type ConfigResource struct {
 
 func (r *ConfigResource) Get() (interface{}, error) {
 	Config := common.ConfigDB{}
-	if err := db.GetById(common.ConfigTable, ID, &Config); err != nil {
+	if err := db.GetById(common.ConfigTable, common.ConfigID, &Config); err != nil {
 		return nil, err
 	}
 	return Config, nil
@@ -47,7 +46,7 @@ func (r *ConfigResource) Create(c *gin.Context) (err error) {
 	if len(configList) > 0 {
 		return r.Update(c)
 	} else {
-		r.PostData.Id = ID
+		r.PostData.Id = common.ConfigID
 		r.PostData.CreateTime = time.Now().Unix()
 		r.PostData.ModifyTime = time.Now().Unix()
 		if err = db.Insert(common.ConfigTable, r.PostData); err != nil {
@@ -84,17 +83,17 @@ func (r *ConfigResource) Delete() (err error) {
 }
 
 func (r *ConfigResource) Update(c *gin.Context) (err error) {
-	Configs := common.ConfigDB{}
-	if err = db.GetById(common.ConfigTable, ID, &Configs); err != nil {
+	configs := common.ConfigDB{}
+	if err = db.GetById(common.ConfigTable, common.ConfigID, &configs); err != nil {
 		log.Errorf("Config update error:%s; Json:%+v; Name:%s", err, r.PostData, r.PostData.Id)
 		return
 	}
-	Configs.ModifyTime = time.Now().Unix()
+	configs.ModifyTime = time.Now().Unix()
 	switch r.ConfigType {
 	case "ldap":
-		Configs.LDAPDB = r.PostData.LDAPDB
+		configs.LDAPDB = r.PostData.LDAPDB
 	}
-	if err = db.Update(common.ConfigTable, ID, Configs); err != nil {
+	if err = db.Update(common.ConfigTable, common.ConfigID, configs); err != nil {
 		log.Errorf("Config update error:%s; Json:%+v; Name:%s", err, r.PostData, r.PostData.Id)
 		return
 	}
@@ -106,6 +105,24 @@ func (r *ConfigResource) Update(c *gin.Context) (err error) {
 	}
 	if err = auditLog.InsertAuditLog(); err != nil {
 		return
+	}
+	return
+}
+
+func (r *ConfigResource) LDAPTest(c *gin.Context) (err error) {
+	config := common.ConfigDB{}
+	if err = c.BindJSON(&config); err != nil {
+		return err
+	}
+	client := *kit.LdapLookup(config.LDAPDB.URL,
+		config.LDAPDB.SearchDN,
+		config.LDAPDB.SearchPassword,
+		config.LDAPDB.BaseDN,
+		config.LDAPDB.UserFilter,
+		config.LDAPDB.TLS)
+	err = client.Connect()
+	if err != nil {
+		return err
 	}
 	return
 }
