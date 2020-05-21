@@ -97,6 +97,9 @@ func SetupRouter(r *gin.Engine) *gin.Engine {
 		authorize.DELETE(common.KingfisherPath+"config/:name", impl.DeleteConfig)
 		authorize.PUT(common.KingfisherPath+"config", impl.UpdateConfig)
 
+		// LDAP test
+		authorize.POST(common.KingfisherPath+"ldap/test", impl.LDAPTest)
+
 	}
 	return r
 }
