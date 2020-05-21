@@ -36,3 +36,9 @@ func UpdateConfig(c *gin.Context) {
 	responseData := HandleUpdate(&r, c)
 	c.JSON(responseData.Code, responseData)
 }
+
+func LDAPTest(c *gin.Context) {
+	r := resource.ConfigResource{Params: handle.GenerateCommonParams(c, nil)}
+	responseData := HandleLDAPTest(&r, c)
+	c.JSON(responseData.Code, responseData)
+}

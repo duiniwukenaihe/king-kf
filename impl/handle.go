@@ -35,6 +35,10 @@ type HandleUnInstallInterface interface {
 	UnInstall() error
 }
 
+type HandleLDAPTestInterface interface {
+	LDAPTest(c *gin.Context) error
+}
+
 func HandleGet(r HandleGetInterface) *common.ResponseData {
 	responseData := handle.HandlerResponse(r.Get())
 	return responseData
@@ -68,5 +72,10 @@ func HandleInstall(r HandleInstallInterface) *common.ResponseData {
 
 func HandleUnInstall(r HandleUnInstallInterface) *common.ResponseData {
 	responseData := handle.HandlerResponse(nil, r.UnInstall())
+	return responseData
+}
+
+func HandleLDAPTest(r HandleLDAPTestInterface, c *gin.Context) *common.ResponseData {
+	responseData := handle.HandlerResponse(nil, r.LDAPTest(c))
 	return responseData
 }
