@@ -18,7 +18,6 @@ func SetupRouter(r *gin.Engine) *gin.Engine {
 	// login
 	r.POST(common.KingfisherPath+"login", user.Login)
 	r.GET(common.KingfisherPath+"logout", user.Logout)
-	r.GET(common.KingfisherPath+"token", user.Index)
 
 	authorize := r.Group("/", jwtAuth.JWTAuth())
 	{
