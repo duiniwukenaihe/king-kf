@@ -922,6 +922,11 @@ func (r *PlatformRoleResource) ListPlatformRoleTree() (interface{}, error) {
 		                        "title": "删除用户",
 		                        "name": "del_user",
 		                		"level": 3
+                			},
+                			{
+		                        "title": "修改密码",
+		                        "name": "change_pw",
+		                		"level": 3
                 			}
                 		]
                     },
