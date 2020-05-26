@@ -46,6 +46,8 @@ func SetupRouter(r *gin.Engine) *gin.Engine {
 		authorize.POST(common.KingfisherPath+"user", user.CreateUser)
 		authorize.PUT(common.KingfisherPath+"user", user.UpdateUser)
 		authorize.GET(common.KingfisherPath+"userByToken", user.GetUserByToken)
+		authorize.GET(common.KingfisherPath+"userAuthMode", user.GetUserAuthMode)
+		authorize.PUT(common.KingfisherPath+"changePassword", user.ChangePassword)
 
 		// audit log
 		authorize.GET(common.KingfisherPath+"audit", impl.ListAuditLog)

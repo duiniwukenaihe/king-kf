@@ -8,6 +8,7 @@ import (
 	"github.com/open-kingfisher/king-utils/db"
 	"github.com/open-kingfisher/king-utils/kit"
 	"github.com/open-kingfisher/king-utils/middleware/jwt"
+	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/sync/errgroup"
 	"net/http"
 	"sync"
@@ -147,6 +148,7 @@ func ListUser(c *gin.Context) {
 					"cluster":    cluster,
 					"namespace":  namespace,
 					"role":       platformRole,
+					"authMode":   user.AuthMode,
 					"modifyTime": user.ModifyTime,
 					"createTime": user.CreateTime,
 				})
@@ -226,6 +228,7 @@ func GetUser(c *gin.Context) {
 			"namespace":  namespace,
 			"access":     platformRoleAccess,
 			"role":       platformRole,
+			"authMode":   user.AuthMode,
 			"modifyTime": user.ModifyTime,
 			"createTime": user.CreateTime,
 		}
@@ -297,6 +300,7 @@ func CreateUser(c *gin.Context) {
 		ModifyTime: time.Now().Unix(),
 	}
 	c.BindJSON(&users)
+	users.Password, _ = HashPassword(users.Password)
 	// 对提交的数据进行校验
 	if err := c.ShouldBindWith(&users, binding.Query); err != nil {
 		responseData.Msg = err.Error()
@@ -367,8 +371,11 @@ func UpdateUser(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, responseData)
 		return
 	}
+	password := users.Password
 	c.BindJSON(&users)
 	users.ModifyTime = time.Now().Unix()
+	// 编辑不能修改密码
+	users.Password = password
 	// 对提交的数据进行校验
 	if err := c.ShouldBindWith(&users, binding.Query); err != nil {
 		responseData.Msg = err.Error()
@@ -483,4 +490,90 @@ func GetUserByToken(c *gin.Context) {
 		log.Errorf("Get user by token: %s", err)
 	}
 	c.JSON(responseData.Code, responseData)
+}
+
+func GetUserAuthMode(c *gin.Context) {
+	config := common.ConfigDB{}
+	if err := db.GetById(common.ConfigTable, common.ConfigID, &config); err != nil {
+		responseData.Msg = err.Error()
+		responseData.Data = ""
+		responseData.Code = http.StatusInternalServerError
+		c.JSON(http.StatusInternalServerError, responseData)
+		return
+	} else {
+		if config.LDAPDB.Mode == "ldap" {
+			responseData.Data = map[string]string{"mode": "ldap"}
+		} else {
+			responseData.Data = map[string]string{"mode": "local"}
+		}
+		responseData.Msg = ""
+		responseData.Code = http.StatusOK
+	}
+	c.JSON(responseData.Code, responseData)
+}
+
+func ChangePassword(c *gin.Context) {
+	responseData := common.ResponseData{}
+	var changePassword struct {
+		UserId   string `json:"userId"`
+		Password string `json:"password"`
+	}
+	c.BindJSON(&changePassword)
+	users := common.User{}
+	if err := db.GetById(common.UserTable, changePassword.UserId, &users); err != nil {
+		responseData.Msg = err.Error()
+		responseData.Data = ""
+		responseData.Code = http.StatusBadRequest
+		c.JSON(http.StatusBadRequest, responseData)
+		return
+	}
+	users.ModifyTime = time.Now().Unix()
+	users.Password, _ = HashPassword(changePassword.Password)
+	// 对提交的数据进行校验
+	if err := c.ShouldBindWith(&users, binding.Query); err != nil {
+		responseData.Msg = err.Error()
+		responseData.Data = ""
+		responseData.Code = http.StatusBadRequest
+		c.JSON(http.StatusBadRequest, responseData)
+		return
+	}
+	auditLog := common.AuditLog{
+		Type:       common.UserTable,
+		Id:         users.Id,
+		Name:       users.Name,
+		User:       users.Name,
+		ProductId:  "",
+		Cluster:    "",
+		Json:       users,
+		ActionTime: time.Now().Unix(),
+		ActionType: common.Update,
+		Namespace:  "",
+		Result:     true,
+		Msg:        "",
+	}
+	if err := db.Update(common.UserTable, changePassword.UserId, users); err == nil {
+		responseData.Msg = ""
+		responseData.Data = ""
+		responseData.Code = http.StatusOK
+	} else {
+		responseData.Msg = err.Error()
+		responseData.Data = ""
+		responseData.Code = http.StatusInternalServerError
+		auditLog.Msg = err.Error()
+		log.Errorf("User create error:%s; Json:%+v; Name:%s", err, users, users.Name)
+	}
+	if err := db.Insert(common.AuditLogTable, auditLog); err != nil {
+		log.Errorf("User insert audit log: %s", err)
+	}
+	c.JSON(responseData.Code, responseData)
+}
+
+func HashPassword(password string) (string, error) {
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
+	return string(bytes), err
+}
+
+func CheckPasswordHash(password, hash string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+	return err == nil
 }
