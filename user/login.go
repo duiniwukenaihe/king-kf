@@ -30,39 +30,59 @@ func Login(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, responseData)
 		return
 	}
-	client := *kit.LdapLookup(config.LDAPDB.URL,
-		config.LDAPDB.SearchDN,
-		config.LDAPDB.SearchPassword,
-		config.LDAPDB.BaseDN,
-		config.LDAPDB.UserFilter,
-		config.LDAPDB.TLS)
+	// 获取登录信息
 	login := LoginPost{}
 	c.BindJSON(&login)
-	// ldap进行验证,获取用户信息
-	ok, user, err := client.Authenticate(login.Username, login.Password)
-	defer client.Close()
-	if err != nil || !ok {
-		responseData.Msg = err.Error()
-		responseData.Data = ""
-		responseData.Code = http.StatusInternalServerError
-		c.JSON(http.StatusInternalServerError, responseData)
-		log.Errorf("ldap authenticate error: %s", err)
-		return
-	}
-	users := common.User{}
-	if err := db.Get(common.UserTable, map[string]interface{}{"$.name": login.Username}, &users); err != nil {
+	// 校验用户是否存在
+	userDB := common.User{}
+	if err := db.Get(common.UserTable, map[string]interface{}{"$.name": login.Username}, &userDB); err != nil {
 		responseData.Msg = "The user does not exist"
 		responseData.Data = ""
 		responseData.Code = http.StatusInternalServerError
 		c.JSON(http.StatusInternalServerError, responseData)
 		return
 	}
+
+	user := make(map[string]string)
+	// 认证模式是ldap的
+	if config.LDAPDB.Mode == "ldap" {
+		client := *kit.LdapLookup(config.LDAPDB.URL,
+			config.LDAPDB.SearchDN,
+			config.LDAPDB.SearchPassword,
+			config.LDAPDB.BaseDN,
+			config.LDAPDB.UserFilter,
+			config.LDAPDB.TLS)
+		// ldap进行验证,获取用户信息
+		var err error
+		var ok bool
+		ok, user, err = client.Authenticate(login.Username, login.Password)
+		defer client.Close()
+		if err != nil || !ok {
+			responseData.Msg = err.Error()
+			responseData.Data = ""
+			responseData.Code = http.StatusInternalServerError
+			c.JSON(http.StatusInternalServerError, responseData)
+			log.Errorf("ldap authenticate error: %s", err)
+			return
+		}
+	} else {
+		match := CheckPasswordHash(login.Password, userDB.Password)
+		if !match {
+			responseData.Msg = "password error"
+			responseData.Data = ""
+			responseData.Code = http.StatusInternalServerError
+			c.JSON(http.StatusInternalServerError, responseData)
+			log.Error("password error")
+			return
+		}
+	}
+
 	//生成token
 	j := &jwtAuth.JWT{
 		SigningKey: []byte(common.Signing),
 	}
 	claims := jwtAuth.CustomClaims{
-		ID:    users.Id,
+		ID:    userDB.Id,
 		Name:  login.Username,
 		Email: user["mail"],
 		StandardClaims: jwt.StandardClaims{
