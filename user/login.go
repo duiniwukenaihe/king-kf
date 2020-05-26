@@ -35,7 +35,7 @@ func Login(c *gin.Context) {
 	c.BindJSON(&login)
 	// 校验用户是否存在
 	userDB := common.User{}
-	if err := db.Get(common.UserTable, map[string]interface{}{"$.name": login.Username}, &userDB); err != nil {
+	if err := db.Get(common.UserTable, map[string]interface{}{"$.name": login.Username, "$.authMode": config.LDAPDB.Mode}, &userDB); err != nil {
 		responseData.Msg = "The user does not exist"
 		responseData.Data = ""
 		responseData.Code = http.StatusInternalServerError

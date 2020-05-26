@@ -311,7 +311,7 @@ func CreateUser(c *gin.Context) {
 	}
 	// 判断用户名是否已经存在
 	userList := make([]*common.User, 0)
-	if err := db.List(common.DataField, common.UserTable, &userList, "WHERE data-> '$.name'='"+users.Name+"'"); err == nil {
+	if err := db.List(common.DataField, common.UserTable, &userList, "WHERE data-> '$.name'=? and data-> '$.authMode'=?", users.Name, users.AuthMode); err == nil {
 		if len(userList) > 0 {
 			responseData.Msg = "The user name already exists"
 			responseData.Data = ""
@@ -386,7 +386,7 @@ func UpdateUser(c *gin.Context) {
 	}
 	// 判断用户名是否已经存在
 	userList := make([]*common.ClusterDB, 0)
-	if err := db.List(common.DataField, common.UserTable, &userList, "WHERE data-> '$.name'='"+users.Name+"'"); err == nil {
+	if err := db.List(common.DataField, common.UserTable, &userList, "WHERE data-> '$.name'=? and data-> '$.authMode'=?", users.Name, users.AuthMode); err == nil {
 		if len(userList) > 0 {
 			for _, v := range userList {
 				if v.Id != id {
