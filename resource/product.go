@@ -53,14 +53,10 @@ func (r *ProductResource) Get() (interface{}, error) {
 			Name: namespaceDB.Name,
 		})
 	}
-	productTreeDB := common.ProductTree{}
-	if err := db.GetById(common.ProductTreeTable, product.Id, &productTreeDB); err != nil {
-		log.Errorf("get product failed, %s ", err)
-	}
 	productResponse = ProductResponse{
 		Info: common.Info{
 			Id:   product.Id,
-			Name: productTreeDB.Name,
+			Name: product.Name,
 		},
 		Cluster:   clusterList,
 		Namespace: namespaceList,
@@ -186,11 +182,9 @@ func (r *ProductResource) Delete() (err error) {
 }
 
 func (r *ProductResource) Update(c *gin.Context) (err error) {
-	product := common.ProductDB{}
-	if err = c.BindJSON(&product); err != nil {
+	if err = c.BindJSON(&r.PostData); err != nil {
 		return err
 	}
-	r.PostData = &product
 	// 判断集产品线否已经存在
 	var createTime int64
 	productList := make([]*common.ProductDB, 0)
@@ -385,12 +379,6 @@ func (r *ProductResource) CascadeAll() (interface{}, error) {
 		})
 	}
 	return productResponse, nil
-}
-
-type TreeCascade struct {
-	Id       string         `json:"id"`
-	Label    string         `json:"label"`
-	Children []*TreeCascade `json:"children,omitempty"`
 }
 
 // 级联列出集群--Namespace
