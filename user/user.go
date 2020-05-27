@@ -17,8 +17,8 @@ import (
 
 func getProduct(user *common.User) ([]map[string]string, error) {
 	productResponse := make([]map[string]string, 0)
-	productList := make([]common.ProductTree, 0)
-	if err := db.List(common.DataField, common.ProductTreeTable, &productList, ""); err != nil {
+	productList := make([]common.ProductDB, 0)
+	if err := db.List(common.DataField, common.ProductTable, &productList, ""); err != nil {
 		log.Errorf("product list error: %s", err)
 		return []map[string]string{}, err
 	}
