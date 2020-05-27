@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/gin-gonic/gin/binding"
 	"github.com/open-kingfisher/king-utils/common"
 	"github.com/open-kingfisher/king-utils/common/handle"
 	"github.com/open-kingfisher/king-utils/common/log"
@@ -12,17 +11,6 @@ import (
 	"github.com/open-kingfisher/king-utils/kit"
 	"time"
 )
-
-type TreeNode struct {
-	Uuid          string `json:"uuid"`
-	Name          string `json:"name"`
-	Right         string `json:"right"`
-	Left          string `json:"left"`
-	Level         string `json:"level"`
-	TechLeader    string `json:"techLeader"`
-	ProductLeader string `json:"productLeader"`
-	Status        string `json:"status"`
-}
 
 type ProductResponse struct {
 	common.Info
@@ -35,22 +23,6 @@ type ProductResponse struct {
 type ProductResource struct {
 	Params   *handle.Resources
 	PostData *common.ProductDB
-}
-
-func (r *ProductResource) GetProductTree() (interface{}, error) {
-	//if resp, err := http.Get(common.RDDSSURL); err != nil {
-	//	log.Errorf("http.Get %s failed, %s ", common.RDDSSURL, err)
-	//	return nil, err
-	//} else {
-	//	ret := map[string]map[string]TreeNodeLevel1{}
-	//	if err = json.NewDecoder(resp.Body).Decode(&ret); err != nil {
-	//		log.Errorf("json.NewDecoder failed, %s ", err)
-	//		return nil, err
-	//	} else {
-	//		return ret, nil
-	//	}
-	//}
-	return "", nil
 }
 
 func (r *ProductResource) Get() (interface{}, error) {
@@ -96,16 +68,6 @@ func (r *ProductResource) Get() (interface{}, error) {
 	return productResponse, nil
 }
 
-type Cluster struct {
-	common.Info
-	Namespace []common.Info
-}
-
-type ListProduct struct {
-	common.Info
-	Cluster
-}
-
 func (r *ProductResource) List() (interface{}, error) {
 	product := make([]common.ProductDB, 0)
 	// 获取产品信息
@@ -141,14 +103,10 @@ func (r *ProductResource) List() (interface{}, error) {
 				Name: fmt.Sprintf("%s |__ %s", clusterDB.Name, namespaceDB.Name),
 			})
 		}
-		productTreeDB := common.ProductTree{}
-		if err := db.GetById(common.ProductTreeTable, p.Id, &productTreeDB); err != nil {
-			log.Errorf("get product failed, %s ", err)
-		}
 		productResponse = append(productResponse, &ProductResponse{
 			Info: common.Info{
 				Id:   p.Id,
-				Name: productTreeDB.Name,
+				Name: p.Name,
 			},
 			Cluster:    clusterList,
 			Namespace:  namespaceList,
@@ -160,18 +118,13 @@ func (r *ProductResource) List() (interface{}, error) {
 }
 
 func (r *ProductResource) Create(c *gin.Context) (err error) {
-	product := common.ProductDB{}
-	if err = c.BindJSON(&product); err != nil {
+	if err = c.BindJSON(&r.PostData); err != nil {
 		return err
 	}
-	r.PostData = &product
-	// 对提交的数据进行校验
-	if err = c.ShouldBindWith(r.PostData, binding.Query); err != nil {
-		return err
-	}
+	uuid := kit.UUID("p")
 	// 判断集产品线否已经存在
 	productList := make([]*common.ProductDB, 0)
-	if err = db.List(common.DataField, common.ProductTable, &productList, "WHERE data-> '$.id'=?", r.PostData.Id); err == nil {
+	if err = db.List(common.DataField, common.ProductTable, &productList, "WHERE data-> '$.name'=?", r.PostData.Name); err == nil {
 		if len(productList) > 0 {
 			return errors.New("the product name already exists")
 		}
@@ -187,6 +140,7 @@ func (r *ProductResource) Create(c *gin.Context) (err error) {
 		cluster = append(cluster, namespaceDB.Cluster)
 	}
 	r.PostData.Cluster = UniqueList(cluster)
+	r.PostData.Id = uuid
 	r.PostData.CreateTime = time.Now().Unix()
 	r.PostData.ModifyTime = time.Now().Unix()
 	if err = db.Insert(common.ProductTable, r.PostData); err != nil {
@@ -237,14 +191,10 @@ func (r *ProductResource) Update(c *gin.Context) (err error) {
 		return err
 	}
 	r.PostData = &product
-	// 对提交的数据进行校验
-	if err = c.ShouldBindWith(r.PostData, binding.Query); err != nil {
-		return err
-	}
 	// 判断集产品线否已经存在
 	var createTime int64
 	productList := make([]*common.ProductDB, 0)
-	if err = db.List(common.DataField, common.ProductTable, &productList, "WHERE data-> '$.id'=?", r.PostData.Id); err == nil {
+	if err = db.List(common.DataField, common.ProductTable, &productList, "WHERE data-> '$.name'=?", r.PostData.Name); err == nil {
 		if len(productList) > 0 {
 			for _, v := range productList {
 				if v.Id != r.PostData.Id {
@@ -329,11 +279,6 @@ func (r *ProductResource) CascadeCluster() (interface{}, error) {
 		// 判断产品线是否在用户的产品线中
 		if In(p.Id, user.Product) {
 			cluster := make([]*Cascade, 0)
-			// 查询产品数获取产品线的名字
-			productTreeDB := common.ProductTree{}
-			if err := db.GetById(common.ProductTreeTable, p.Id, &productTreeDB); err != nil {
-				log.Errorf("Product get error: %s", err)
-			}
 			for _, cc := range p.Cluster {
 				if In(cc, user.Cluster) {
 					clusterDB := common.ClusterDB{}
@@ -372,7 +317,7 @@ func (r *ProductResource) CascadeCluster() (interface{}, error) {
 			productResponse = append(productResponse, &Cascade{
 				InfoType: common.InfoType{
 					Value: p.Id,
-					Label: productTreeDB.Name,
+					Label: p.Name,
 				},
 				Children: cluster,
 			})
@@ -392,11 +337,6 @@ func (r *ProductResource) CascadeAll() (interface{}, error) {
 	productResponse := make([]*Cascade, 0)
 	for _, p := range product {
 		cluster := make([]*Cascade, 0)
-		// 查询产品数获取产品线的名字
-		productTreeDB := common.ProductTree{}
-		if err := db.GetById(common.ProductTreeTable, p.Id, &productTreeDB); err != nil {
-			log.Errorf("Product get error: %s", err)
-		}
 		for _, cc := range p.Cluster {
 			clusterDB := common.ClusterDB{}
 			if err := db.GetById(common.ClusterTable, cc, &clusterDB); err != nil {
@@ -436,10 +376,9 @@ func (r *ProductResource) CascadeAll() (interface{}, error) {
 		}
 		productResponse = append(productResponse, &Cascade{
 			InfoType: common.InfoType{
-				Value: p.Id,
-				//Label: productTreeDB.Name,
+				Value:  p.Id,
 				Level:  0,
-				Title:  productTreeDB.Name,
+				Title:  p.Name,
 				Expand: true,
 			},
 			Children: cluster,
