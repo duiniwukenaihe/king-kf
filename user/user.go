@@ -515,8 +515,9 @@ func GetUserAuthMode(c *gin.Context) {
 func ChangePassword(c *gin.Context) {
 	responseData := common.ResponseData{}
 	var changePassword struct {
-		UserId   string `json:"userId"`
-		Password string `json:"password"`
+		UserId          string `json:"userId"`
+		Password        string `json:"password"`
+		CurrentPassword string `json:"currentPassword"`
 	}
 	c.BindJSON(&changePassword)
 	users := common.User{}
@@ -527,6 +528,17 @@ func ChangePassword(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, responseData)
 		return
 	}
+	// 验证当前密码是否正确
+	if changePassword.CurrentPassword != "" {
+		if !CheckPasswordHash(changePassword.CurrentPassword, users.Password) {
+			responseData.Msg = "the current password is incorrect"
+			responseData.Data = ""
+			responseData.Code = http.StatusBadRequest
+			c.JSON(http.StatusBadRequest, responseData)
+			return
+		}
+	}
+
 	users.ModifyTime = time.Now().Unix()
 	users.Password, _ = HashPassword(changePassword.Password)
 	// 对提交的数据进行校验
