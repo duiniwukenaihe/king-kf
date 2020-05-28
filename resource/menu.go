@@ -570,6 +570,24 @@ const menuData = `[
     ]
   },
   {
+    "path": "/_profile",
+    "component": "main",
+    "name": "_profile",
+    "meta": {
+      "hideInMenu": true
+    },
+    "children": [
+      {
+        "path": "/profile",
+        "name": "profile",
+        "meta": {
+          "hideInMenu": true
+        },
+        "component": "search"
+      }
+    ]
+  },
+  {
     "path": "/401",
     "name": "error_401",
     "meta": {
