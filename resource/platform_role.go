@@ -313,6 +313,11 @@ func (r *PlatformRoleResource) ListPlatformRoleTree() (interface{}, error) {
 								"name": "del_dep"
                 			},
 							{
+		                        "title": "重启部署",
+		                		"level": 3,
+								"name": "restart_dep"
+                			},
+							{
 		                        "title": "保存为模板",
 		                		"level": 3,
 								"name": "save_tem_dep"
