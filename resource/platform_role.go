@@ -394,6 +394,11 @@ func (r *PlatformRoleResource) ListPlatformRoleTree() (interface{}, error) {
 		                        "title": "Pod救援",
 		                		"level": 3,
 								"name": "rescue_pod"
+                			},
+							{
+		                        "title": "Pod摘除",
+		                		"level": 3,
+								"name": "pod_offline"
                 			}
                 		]
                     }
