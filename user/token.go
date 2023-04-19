@@ -3,8 +3,8 @@ package user
 import (
 	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
-	"github.com/open-kingfisher/king-utils/common"
-	jwtAuth "github.com/open-kingfisher/king-utils/middleware/jwt"
+	"github.com/duiniwukenaihe/king-utils/common"
+	jwtAuth "github.com/duiniwukenaihe/king-utils/middleware/jwt"
 	"net/http"
 	"time"
 )

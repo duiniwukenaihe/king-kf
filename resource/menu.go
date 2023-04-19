@@ -2,9 +2,9 @@ package resource
 
 import (
 	"encoding/json"
-	"github.com/open-kingfisher/king-utils/common"
-	"github.com/open-kingfisher/king-utils/common/handle"
-	"github.com/open-kingfisher/king-utils/db"
+	"github.com/duiniwukenaihe/king-utils/common"
+	"github.com/duiniwukenaihe/king-utils/common/handle"
+	"github.com/duiniwukenaihe/king-utils/db"
 )
 
 const menuData = `[

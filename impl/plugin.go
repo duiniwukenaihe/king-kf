@@ -2,8 +2,8 @@ package impl
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/open-kingfisher/king-kf/resource"
-	"github.com/open-kingfisher/king-utils/common/handle"
+	"github.com/duiniwukenaihe/king-kf/resource"
+	"github.com/duiniwukenaihe/king-utils/common/handle"
 )
 
 func GetPlugin(c *gin.Context) {

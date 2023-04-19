@@ -1,6 +1,6 @@
 FROM golang:1.14.3 as builder
 ARG NAME="king-kf"
-ARG GIT_URL="https://github.com/open-kingfisher/$NAME.git"
+ARG GIT_URL="https://github.com/duiniwukenaihe/$NAME.git"
 RUN git clone $GIT_URL /$NAME && cd /$NAME && make
 
 FROM alpine:3.10

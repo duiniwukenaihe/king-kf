@@ -3,13 +3,13 @@ package main
 import (
 	"github.com/DeanThompson/ginpprof"
 	"github.com/gin-gonic/gin"
-	"github.com/open-kingfisher/king-kf/router"
-	"github.com/open-kingfisher/king-utils/common"
-	"github.com/open-kingfisher/king-utils/common/log"
-	"github.com/open-kingfisher/king-utils/common/rabbitmq"
-	"github.com/open-kingfisher/king-utils/config"
-	"github.com/open-kingfisher/king-utils/kit"
-	_ "github.com/open-kingfisher/king-utils/middleware/Validator"
+	"github.com/duiniwukenaihe/king-kf/router"
+	"github.com/duiniwukenaihe/king-utils/common"
+	"github.com/duiniwukenaihe/king-utils/common/log"
+	"github.com/duiniwukenaihe/king-utils/common/rabbitmq"
+	"github.com/duiniwukenaihe/king-utils/config"
+	"github.com/duiniwukenaihe/king-utils/kit"
+	_ "github.com/duiniwukenaihe/king-utils/middleware/Validator"
 )
 
 func main() {

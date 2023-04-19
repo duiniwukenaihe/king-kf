@@ -3,11 +3,11 @@ package user
 import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
-	"github.com/open-kingfisher/king-utils/common"
-	"github.com/open-kingfisher/king-utils/common/log"
-	"github.com/open-kingfisher/king-utils/db"
-	"github.com/open-kingfisher/king-utils/kit"
-	jwtAuth "github.com/open-kingfisher/king-utils/middleware/jwt"
+	"github.com/duiniwukenaihe/king-utils/common"
+	"github.com/duiniwukenaihe/king-utils/common/log"
+	"github.com/duiniwukenaihe/king-utils/db"
+	"github.com/duiniwukenaihe/king-utils/kit"
+	jwtAuth "github.com/duiniwukenaihe/king-utils/middleware/jwt"
 	"net/http"
 	"time"
 )

@@ -2,9 +2,9 @@ package impl
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/open-kingfisher/king-utils/common"
-	"github.com/open-kingfisher/king-utils/common/handle"
-	"github.com/open-kingfisher/king-utils/common/log"
+	"github.com/duiniwukenaihe/king-utils/common"
+	"github.com/duiniwukenaihe/king-utils/common/handle"
+	"github.com/duiniwukenaihe/king-utils/common/log"
 )
 
 type HandleGetInterface interface {
